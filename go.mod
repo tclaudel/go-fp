@@ -1,4 +1,4 @@
-module github.com/tclaudel/fp
+module github.com/tclaudel/go-fp
 
 go 1.22.0
 

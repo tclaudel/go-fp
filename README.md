@@ -61,12 +61,16 @@ The package also provides a set of functional programming functions that can be 
 
 To use the functional programming utilities in your Go code, you can import the `fp` package and use the provided types and functions as needed. Here's an example of how to use them:
 
+```bash
+go get github.com/tclaudel/go-fp
+```
+
 ```go
 package main
 
 import (
 	"fmt"
-	"github.com/your-username/fp"
+	"github.com/tclaudel/go-fp"
 )
 
 func main() {
