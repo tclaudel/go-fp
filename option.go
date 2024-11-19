@@ -1,42 +1,47 @@
 package fp
 
 type Option[T any] struct {
-	value *T
+	value T
+	ok    bool
 }
 
 func Some[T any](v T) Option[T] {
-	return Option[T]{value: &v}
+	return Option[T]{
+		value: v,
+		ok:    true,
+	}
 }
 
 func None[T any]() Option[T] {
-	return Option[T]{value: nil}
+	return Option[T]{
+		ok: false,
+	}
 }
 
 func (o Option[T]) IsSome() bool {
-	return o.value != nil
+	return o.ok
 }
 
 func (o Option[T]) IsNone() bool {
-	return o.value == nil
+	return !o.ok
 }
 
 func (o Option[T]) Unwrap() (T, bool) {
-	if o.value == nil {
-		return *new(T), false
-	}
-	return *o.value, true
+	return o.value, o.ok
 }
 
-func (o Option[T]) UnwrapOr(def T) T {
-	if o.value == nil {
-		return def
+func (o Option[T]) UnwrapOr(fallback T) T {
+	if value, ok := o.Unwrap(); ok {
+		return value
 	}
-	return *o.value
+
+	return fallback
 }
 
 func (o Option[T]) UnwrapOrElse(fn func() T) T {
-	if o.value == nil {
-		return fn()
+	if value, ok := o.Unwrap(); ok {
+		return value
 	}
-	return *o.value
+
+	return fn()
 }
