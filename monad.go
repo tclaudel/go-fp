@@ -6,14 +6,14 @@ func (r Result[T]) Map(fn func(T) T) Result[T] {
 	if r.IsErr() {
 		return r
 	}
-	return Ok(fn(*r.value))
+	return Ok(fn(r.value))
 }
 
 func (r Result[T]) Bind(fn func(T) Result[T]) Result[T] {
 	if r.IsErr() {
 		return r
 	}
-	return fn(*r.value)
+	return fn(r.value)
 }
 
 func (r Result[T]) Match(ok func(T), err func(error)) {
@@ -21,7 +21,7 @@ func (r Result[T]) Match(ok func(T), err func(error)) {
 		err(r.err)
 		return
 	}
-	ok(*r.value)
+	ok(r.value)
 }
 
 func (r Result[T]) BindFuncs(fns ...func(T) Result[T]) Result[T] {
@@ -48,7 +48,7 @@ func (r Result[T]) Filter(predicate func(T) bool) Result[T] {
 		return r
 	}
 
-	if !predicate(*r.value) {
+	if !predicate(r.value) {
 		return Err[T](ErrPredicate)
 	}
 
@@ -60,19 +60,19 @@ func (r Result[T]) FilterOr(def T, predicate func(T) bool, err error) Result[T] 
 		return r
 	}
 
-	if !predicate(*r.value) {
+	if !predicate(r.value) {
 		return Err[T](err)
 	}
 
 	return r
 }
 func (r Result[T]) Fold(results []Result[T], fn func(T, T) T) Result[T] {
-	accumulator := *r.value
+	accumulator := r.value
 	for _, r := range results {
 		if r.err != nil {
 			return Err[T](r.err) // Propagate the error
 		}
-		accumulator = fn(accumulator, *r.value)
+		accumulator = fn(accumulator, r.value)
 	}
 	return Ok[T](accumulator)
 }
@@ -83,7 +83,7 @@ func Sequence[T any](results []Result[T]) Result[[]T] {
 		if r.err != nil {
 			return Err[[]T](r.err) // Propagate the error
 		}
-		values = append(values, *r.value)
+		values = append(values, r.value)
 	}
 	return Ok(values)
 }
@@ -100,7 +100,7 @@ func Join[T any](results Result[Result[T]]) Result[T] {
 	if results.IsErr() {
 		return Err[T](results.err)
 	}
-	return *results.value
+	return results.value
 }
 
 func Apply[T any, U any](fn Result[func(T) Result[U]], arg Result[T]) Result[U] {
@@ -109,5 +109,5 @@ func Apply[T any, U any](fn Result[func(T) Result[U]], arg Result[T]) Result[U] 
 		return Err[U](err)
 	}
 
-	return fnUnwrapped(*arg.value)
+	return fnUnwrapped(arg.value)
 }

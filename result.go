@@ -1,12 +1,15 @@
 package fp
 
 type Result[T any] struct {
-	value *T
+	value T
 	err   error
 }
 
 func Ok[T any](v T) Result[T] {
-	return Result[T]{value: &v}
+	return Result[T]{
+		value: v,
+		err:   nil,
+	}
 }
 
 func Err[T any](e error) Result[T] {
@@ -14,7 +17,7 @@ func Err[T any](e error) Result[T] {
 }
 
 func (r Result[T]) IsOk() bool {
-	return r.value != nil
+	return r.err == nil
 }
 
 func (r Result[T]) IsErr() bool {
@@ -22,10 +25,7 @@ func (r Result[T]) IsErr() bool {
 }
 
 func (r Result[T]) Unwrap() (T, error) {
-	if r.value == nil {
-		return *new(T), r.err
-	}
-	return *r.value, nil
+	return r.value, r.err
 }
 
 func (r Result[T]) UnwrapErr() error {
@@ -33,15 +33,17 @@ func (r Result[T]) UnwrapErr() error {
 }
 
 func (r Result[T]) UnwrapOr(def T) T {
-	if r.value == nil {
-		return def
+	if r.err == nil {
+		return r.value
 	}
-	return *r.value
+
+	return def
 }
 
 func (r Result[T]) UnwrapOrElse(fn func() T) T {
-	if r.value == nil {
-		return fn()
+	if r.err == nil {
+		return r.value
 	}
-	return *r.value
+
+	return fn()
 }
